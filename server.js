@@ -2,13 +2,12 @@ const express = require("express")
 const multer = require("multer")
 const cors = require("cors")
 const fs = require("fs")
-const path = require("path")
 
 const app = express()
+
 app.use(cors())
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
-
 app.use(express.static("public"))
 app.use("/uploads", express.static("uploads"))
 
@@ -24,7 +23,7 @@ if (!fs.existsSync("orders.json")) {
     fs.writeFileSync("orders.json", "[]")
 }
 
-// multer storage
+// multer
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, "uploads/")
@@ -41,14 +40,14 @@ app.post("/upload", upload.single("file"), (req, res) => {
 
     const { copies, color, side } = req.body
 
-    const orders = JSON.parse(fs.readFileSync("orders.json"))
+    let orders = JSON.parse(fs.readFileSync("orders.json"))
 
     const newOrder = {
         id: Date.now(),
         file: req.file.filename,
-        copies: copies,
-        color: color,
-        side: side,
+        copies,
+        color,
+        side,
         status: "Pending"
     }
 
@@ -56,10 +55,7 @@ app.post("/upload", upload.single("file"), (req, res) => {
 
     fs.writeFileSync("orders.json", JSON.stringify(orders, null, 2))
 
-    res.json({
-        success: true,
-        order: newOrder
-    })
+    res.json(newOrder)
 })
 
 // get orders

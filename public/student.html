@@ -2,35 +2,48 @@
 <html>
 <head>
     <title>SilentPrint Student</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<h2>Upload Print Order</h2>
+<div class="container">
 
-<form id="uploadForm">
+    <img src="logo.png" class="logo">
 
-    <input type="file" name="file" required><br><br>
+    <h3>Smart Xerox Ordering System</h3>
 
-    <input type="number" name="copies" placeholder="Copies" required><br><br>
+    <div class="card">
 
-    <select name="color">
-        <option>Black & White</option>
-        <option>Color</option>
-    </select><br><br>
+        <h2>Upload Print Order</h2>
 
-    <select name="side">
-        <option>Single</option>
-        <option>Double</option>
-    </select><br><br>
+        <form id="uploadForm">
 
-    <button type="submit">Place Order</button>
+            <input type="file" name="file" required>
 
-</form>
+            <input type="number" name="copies" placeholder="Copies" required>
 
-<h2>Your Orders</h2>
+            <select name="color">
+                <option>Black & White</option>
+                <option>Color</option>
+            </select>
 
-<div id="orders"></div>
+            <select name="side">
+                <option>Single</option>
+                <option>Double</option>
+            </select>
+
+            <button type="submit">Place Order</button>
+
+        </form>
+
+    </div>
+
+    <h2>Your Orders</h2>
+
+    <div id="orders"></div>
+
+</div>
 
 <script>
 
@@ -42,12 +55,10 @@ form.addEventListener("submit", async (e) => {
 
     const formData = new FormData(form)
 
-    const res = await fetch("/upload", {
+    await fetch("/upload", {
         method: "POST",
         body: formData
     })
-
-    const data = await res.json()
 
     alert("Order placed successfully")
 
@@ -64,11 +75,10 @@ async function loadOrders() {
     orders.forEach(order => {
 
         html += `
-        <div>
-            <p>Order ID: ${order.id}</p>
-            <p>File: ${order.file}</p>
-            <p>Status: ${order.status}</p>
-            <hr>
+        <div class="order">
+            <p><b>Order ID:</b> ${order.id}</p>
+            <p><b>File:</b> ${order.file}</p>
+            <p><b>Status:</b> ${order.status}</p>
         </div>
         `
     })
