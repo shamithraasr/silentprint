@@ -36,7 +36,7 @@ button {
 }
 
 button:hover {
-    background: #1e4ed8;
+    opacity: 0.9;
 }
 
 .order {

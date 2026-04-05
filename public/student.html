@@ -5,15 +5,8 @@
     <link rel="stylesheet" href="style.css">
 
     <style>
-        .pending {
-            color: red;
-            font-weight: bold;
-        }
-
-        .completed {
-            color: green;
-            font-weight: bold;
-        }
+        .pending { color: red; font-weight: bold; }
+        .completed { color: green; font-weight: bold; }
     </style>
 </head>
 
@@ -73,9 +66,7 @@ form.addEventListener("submit", async (e) => {
     })
 
     alert("Order placed successfully")
-
     form.reset()
-
     loadOrders()
 })
 
@@ -88,7 +79,9 @@ async function loadOrders() {
 
     orders.forEach(order => {
 
-        let statusClass = order.status === "Completed" ? "completed" : "pending"
+        let statusClass = order.status === "Completed"
+            ? "completed"
+            : "pending"
 
         html += `
         <div class="order">
