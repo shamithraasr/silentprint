@@ -3,6 +3,18 @@
 <head>
     <title>SilentPrint Student</title>
     <link rel="stylesheet" href="style.css">
+
+    <style>
+        .pending {
+            color: red;
+            font-weight: bold;
+        }
+
+        .completed {
+            color: green;
+            font-weight: bold;
+        }
+    </style>
 </head>
 
 <body>
@@ -62,6 +74,8 @@ form.addEventListener("submit", async (e) => {
 
     alert("Order placed successfully")
 
+    form.reset()
+
     loadOrders()
 })
 
@@ -74,11 +88,15 @@ async function loadOrders() {
 
     orders.forEach(order => {
 
+        let statusClass = order.status === "Completed" ? "completed" : "pending"
+
         html += `
         <div class="order">
             <p><b>Order ID:</b> ${order.id}</p>
             <p><b>File:</b> ${order.file}</p>
-            <p><b>Status:</b> ${order.status}</p>
+            <p class="${statusClass}">
+                Status: ${order.status}
+            </p>
         </div>
         `
     })

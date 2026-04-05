@@ -3,6 +3,28 @@
 <head>
     <title>SilentPrint Admin</title>
     <link rel="stylesheet" href="style.css">
+
+    <style>
+        .pending {
+            color: red;
+            font-weight: bold;
+        }
+
+        .completed {
+            color: green;
+            font-weight: bold;
+        }
+
+        .open-btn {
+            background: #333;
+            margin-top: 5px;
+        }
+
+        .complete-btn {
+            background: green;
+            margin-top: 5px;
+        }
+    </style>
 </head>
 
 <body>
@@ -28,18 +50,28 @@ async function loadOrders() {
 
     orders.forEach(order => {
 
+        let statusClass = order.status === "Completed" ? "completed" : "pending"
+
         html += `
         <div class="order">
 
             <p><b>Order ID:</b> ${order.id}</p>
-            <p><b>File:</b> ${order.file}</p>
+
             <p><b>Copies:</b> ${order.copies}</p>
             <p><b>Color:</b> ${order.color}</p>
             <p><b>Side:</b> ${order.side}</p>
-            <p><b>Status:</b> ${order.status}</p>
 
-            <button onclick="updateStatus(${order.id})">
-                Mark Printed
+            <p class="${statusClass}">
+                Status: ${order.status}
+            </p>
+
+            <a href="/uploads/${order.file}" target="_blank">
+                <button class="open-btn">Open File</button>
+            </a>
+
+            <button class="complete-btn"
+                onclick="updateStatus(${order.id})">
+                Mark Completed
             </button>
 
         </div>
@@ -58,7 +90,7 @@ async function updateStatus(id) {
         },
         body: JSON.stringify({
             id: id,
-            status: "Printed"
+            status: "Completed"
         })
     })
 
