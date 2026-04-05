@@ -1,110 +1,45 @@
-const express = require("express");
-const multer = require("multer");
-const cors = require("cors");
-const fs = require("fs");
-const path = require("path");
-const pdfParse = require("pdf-parse");
+const express = require("express")
+const multer = require("multer")
+const path = require("path")
 
-const app = express();
-const PORT = 3000;
+const app = express()
 
-// Middleware
-app.use(cors());
-app.use(express.json());
-app.use(express.static("public"));
-app.use("/uploads", express.static("uploads"));
-
-// Storage
 const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, "uploads/");
-    },
+    destination: "./uploads",
     filename: function (req, file, cb) {
-        cb(null, Date.now() + "-" + file.originalname);
+        cb(null, Date.now() + path.extname(file.originalname))
     }
-});
+})
 
-const upload = multer({ storage: storage });
+const upload = multer({ storage: storage })
 
-// Order storage
-let orders = [];
-let orderCounter = 1;
+app.use(express.static("public"))
+app.use(express.json())
 
-// Function to get PDF page count
-async function getPdfPages(filePath) {
-    try {
-        const dataBuffer = fs.readFileSync(filePath);
-        const data = await pdfParse(dataBuffer);
-        return data.numpages;
-    } catch (error) {
-        return 1;
+let orders = []
+
+app.post("/upload", upload.single("file"), (req, res) => {
+
+    let order = {
+        file: req.file.filename,
+        copies: req.body.copies,
+        color: req.body.color,
+        side: req.body.side
     }
-}
 
-// 📥 Student place order
-app.post("/upload", upload.single("file"), async (req, res) => {
-    try {
-        const file = req.file;
-        const copies = parseInt(req.body.copies);
-        const color = req.body.color;
-        const sides = req.body.sides;
+    orders.push(order)
 
-        let pages = 1;
+    res.json({
+        message: "Order placed successfully"
+    })
+})
 
-        if (file.mimetype === "application/pdf") {
-            pages = await getPdfPages(file.path);
-        }
-
-        const order = {
-            id: orderCounter++,
-            fileName: file.originalname,
-            filePath: file.path,
-            copies: copies,
-            pages: pages,
-            color: color,
-            sides: sides,
-            status: "Pending"
-        };
-
-        orders.push(order);
-
-        res.json({
-            message: "Order placed successfully",
-            order: order
-        });
-
-    } catch (error) {
-        res.status(500).json({ error: "Upload failed" });
-    }
-});
-
-// 📋 Admin view orders
 app.get("/orders", (req, res) => {
-    res.json(orders);
-});
+    res.json(orders)
+})
 
-// 🖨️ Mark ready to collect
-app.post("/complete/:id", (req, res) => {
-    const id = parseInt(req.params.id);
+const PORT = process.env.PORT || 3000
 
-    const order = orders.find(o => o.id === id);
-
-    if (order) {
-        order.status = "Ready to Collect";
-        res.json({ message: "Order completed" });
-    } else {
-        res.status(404).json({ message: "Order not found" });
-    }
-});
-
-// 🗑️ Delete order
-app.delete("/delete/:id", (req, res) => {
-    const id = parseInt(req.params.id);
-    orders = orders.filter(o => o.id !== id);
-    res.json({ message: "Order deleted" });
-});
-
-// 🌍 Run server (important for ngrok)
-app.listen(PORT, "0.0.0.0", () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
-});
+app.listen(PORT, () => {
+    console.log("Server running on port", PORT)
+})
