@@ -2,106 +2,39 @@
 <html>
 <head>
     <title>SilentPrint Admin</title>
-
-    <style>
-
-        body {
-            font-family: Arial;
-            background: #f4f6f9;
-            text-align: center;
-            padding: 30px;
-        }
-
-        .logo {
-            width: 260px;
-            display: block;
-            margin: auto;
-        }
-
-        .subtitle {
-            color: gray;
-            font-size: 18px;
-            margin-top: 5px;
-            margin-bottom: 30px;
-        }
-
-        .order {
-            background: white;
-            width: 420px;
-            margin: auto;
-            padding: 20px;
-            margin-top: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px #ccc;
-        }
-
-        button {
-            padding: 12px;
-            margin-top: 10px;
-            border: none;
-            cursor: pointer;
-            color: white;
-            width: 100%;
-            font-size: 14px;
-        }
-
-        .printBtn {
-            background: #2563eb;
-        }
-
-        .completeBtn {
-            background: red;
-        }
-
-        .completed {
-            background: green !important;
-        }
-
-    </style>
 </head>
 
 <body>
 
-<img src="/logo.png" class="logo">
-<div class="subtitle">Admin Panel</div>
-
-<h2>Orders</h2>
+<h2>Admin Panel</h2>
 
 <div id="orders"></div>
 
 <script>
 
-async function loadOrders(){
+async function loadOrders() {
 
-    let res = await fetch("/orders")
-    let orders = await res.json()
+    const res = await fetch("/orders")
+    const orders = await res.json()
 
     let html = ""
 
-    orders.forEach(o => {
+    orders.forEach(order => {
 
         html += `
-        <div class="order">
+        <div>
+            <p>Order ID: ${order.id}</p>
+            <p>File: ${order.file}</p>
+            <p>Copies: ${order.copies}</p>
+            <p>Color: ${order.color}</p>
+            <p>Side: ${order.side}</p>
+            <p>Status: ${order.status}</p>
 
-            <p><b>Order ID:</b> ${o.id}</p>
-            <p><b>File:</b> ${o.file}</p>
-            <p><b>Copies:</b> ${o.copies}</p>
-            <p><b>Color:</b> ${o.color}</p>
-            <p><b>Sides:</b> ${o.sides}</p>
-            <p><b>Status:</b> ${o.status}</p>
-
-            <a href="/uploads/${o.file}" target="_blank">
-                <button class="printBtn">Print File</button>
-            </a>
-
-            <button 
-                class="completeBtn ${o.status == 'Ready to Collect' ? 'completed' : ''}" 
-                onclick="completeOrder(${o.id})">
-
-                Complete Order
-
+            <button onclick="updateStatus(${order.id}, 'Printed')">
+                Mark Printed
             </button>
 
+            <hr>
         </div>
         `
     })
@@ -109,16 +42,20 @@ async function loadOrders(){
     document.getElementById("orders").innerHTML = html
 }
 
-async function completeOrder(id){
+async function updateStatus(id, status) {
 
-    await fetch("/complete/" + id)
+    await fetch("/update-status", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ id, status })
+    })
 
     loadOrders()
 }
 
 loadOrders()
-
-setInterval(loadOrders, 5000)
 
 </script>
 

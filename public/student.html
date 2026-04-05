@@ -2,114 +2,31 @@
 <html>
 <head>
     <title>SilentPrint Student</title>
-
-    <style>
-
-        body {
-            font-family: Arial;
-            background: #f4f6f9;
-            text-align: center;
-            padding: 30px;
-        }
-
-        .header {
-            margin-bottom: 20px;
-        }
-
-        .logo {
-            width: 260px;
-            display: block;
-            margin: auto;
-        }
-
-        .subtitle {
-            color: gray;
-            font-size: 18px;
-            margin-top: 5px;
-            margin-bottom: 30px;
-        }
-
-        .box {
-            background: white;
-            width: 420px;
-            margin: auto;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px #ccc;
-        }
-
-        input, select, button {
-            width: 100%;
-            padding: 12px;
-            margin-top: 10px;
-        }
-
-        button {
-            background: #2563eb;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-size: 15px;
-        }
-
-        button:hover {
-            background: #1e40af;
-        }
-
-        .order {
-            background: white;
-            padding: 15px;
-            margin: 10px auto;
-            border-radius: 10px;
-            width: 420px;
-            box-shadow: 0 0 5px #ccc;
-        }
-
-        .ready {
-            color: green;
-            font-weight: bold;
-        }
-
-        .waiting {
-            color: orange;
-            font-weight: bold;
-        }
-
-    </style>
 </head>
 
 <body>
 
-<div class="header">
-    <img src="/logo.png" class="logo">
-    <div class="subtitle">Smart Xerox Ordering System</div>
-</div>
+<h2>Upload Print Order</h2>
 
-<div class="box">
+<form id="uploadForm">
 
-    <h2>Upload Print Order</h2>
+    <input type="file" name="file" required><br><br>
 
-    <form id="orderForm">
+    <input type="number" name="copies" placeholder="Copies" required><br><br>
 
-        <input type="file" name="file" required>
+    <select name="color">
+        <option>Black & White</option>
+        <option>Color</option>
+    </select><br><br>
 
-        <input type="number" name="copies" placeholder="Copies" required>
+    <select name="side">
+        <option>Single</option>
+        <option>Double</option>
+    </select><br><br>
 
-        <select name="color">
-            <option>Black & White</option>
-            <option>Color</option>
-        </select>
+    <button type="submit">Place Order</button>
 
-        <select name="sides">
-            <option>Single</option>
-            <option>Double</option>
-        </select>
-
-        <button type="submit">Place Order</button>
-
-    </form>
-
-</div>
+</form>
 
 <h2>Your Orders</h2>
 
@@ -117,45 +34,41 @@
 
 <script>
 
-document.getElementById("orderForm").addEventListener("submit", async function(e){
+const form = document.getElementById("uploadForm")
+
+form.addEventListener("submit", async (e) => {
 
     e.preventDefault()
 
-    let formData = new FormData(this)
+    const formData = new FormData(form)
 
-    let res = await fetch("/upload", {
+    const res = await fetch("/upload", {
         method: "POST",
         body: formData
     })
 
-    await res.json()
+    const data = await res.json()
 
-    alert("Order Placed Successfully")
+    alert("Order placed successfully")
 
     loadOrders()
 })
 
-async function loadOrders(){
+async function loadOrders() {
 
-    let res = await fetch("/orders")
-    let orders = await res.json()
+    const res = await fetch("/orders")
+    const orders = await res.json()
 
     let html = ""
 
-    orders.forEach(o => {
+    orders.forEach(order => {
 
         html += `
-        <div class="order">
-
-            <p><b>Order ID:</b> ${o.id}</p>
-            <p><b>File:</b> ${o.file}</p>
-
-            <p><b>Status:</b>
-                <span class="${o.status == 'Ready to Collect' ? 'ready' : 'waiting'}">
-                    ${o.status}
-                </span>
-            </p>
-
+        <div>
+            <p>Order ID: ${order.id}</p>
+            <p>File: ${order.file}</p>
+            <p>Status: ${order.status}</p>
+            <hr>
         </div>
         `
     })
@@ -164,8 +77,6 @@ async function loadOrders(){
 }
 
 loadOrders()
-
-setInterval(loadOrders, 5000)
 
 </script>
 

@@ -1,45 +1,94 @@
 const express = require("express")
 const multer = require("multer")
+const cors = require("cors")
+const fs = require("fs")
 const path = require("path")
 
 const app = express()
+app.use(cors())
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
 
+app.use(express.static("public"))
+app.use("/uploads", express.static("uploads"))
+
+const PORT = process.env.PORT || 3000
+
+// create uploads folder
+if (!fs.existsSync("uploads")) {
+    fs.mkdirSync("uploads")
+}
+
+// create orders.json
+if (!fs.existsSync("orders.json")) {
+    fs.writeFileSync("orders.json", "[]")
+}
+
+// multer storage
 const storage = multer.diskStorage({
-    destination: "./uploads",
+    destination: function (req, file, cb) {
+        cb(null, "uploads/")
+    },
     filename: function (req, file, cb) {
-        cb(null, Date.now() + path.extname(file.originalname))
+        cb(null, Date.now() + "-" + file.originalname)
     }
 })
 
 const upload = multer({ storage: storage })
 
-app.use(express.static("public"))
-app.use(express.json())
-
-let orders = []
-
+// upload order
 app.post("/upload", upload.single("file"), (req, res) => {
 
-    let order = {
+    const { copies, color, side } = req.body
+
+    const orders = JSON.parse(fs.readFileSync("orders.json"))
+
+    const newOrder = {
+        id: Date.now(),
         file: req.file.filename,
-        copies: req.body.copies,
-        color: req.body.color,
-        side: req.body.side
+        copies: copies,
+        color: color,
+        side: side,
+        status: "Pending"
     }
 
-    orders.push(order)
+    orders.push(newOrder)
+
+    fs.writeFileSync("orders.json", JSON.stringify(orders, null, 2))
 
     res.json({
-        message: "Order placed successfully"
+        success: true,
+        order: newOrder
     })
 })
 
+// get orders
 app.get("/orders", (req, res) => {
+
+    const orders = JSON.parse(fs.readFileSync("orders.json"))
     res.json(orders)
+
 })
 
-const PORT = process.env.PORT || 3000
+// update status
+app.post("/update-status", (req, res) => {
+
+    const { id, status } = req.body
+
+    let orders = JSON.parse(fs.readFileSync("orders.json"))
+
+    orders = orders.map(order => {
+        if (order.id == id) {
+            order.status = status
+        }
+        return order
+    })
+
+    fs.writeFileSync("orders.json", JSON.stringify(orders, null, 2))
+
+    res.json({ success: true })
+})
 
 app.listen(PORT, () => {
-    console.log("Server running on port", PORT)
+    console.log("Server running on port " + PORT)
 })
