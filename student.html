@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SilentPrint Student</title>
+
+    <style>
+
+        body {
+            font-family: Arial;
+            background: #f4f6f9;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .header {
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            width: 260px;
+            display: block;
+            margin: auto;
+        }
+
+        .subtitle {
+            color: gray;
+            font-size: 18px;
+            margin-top: 5px;
+            margin-bottom: 30px;
+        }
+
+        .box {
+            background: white;
+            width: 420px;
+            margin: auto;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px #ccc;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+        }
+
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        button:hover {
+            background: #1e40af;
+        }
+
+        .order {
+            background: white;
+            padding: 15px;
+            margin: 10px auto;
+            border-radius: 10px;
+            width: 420px;
+            box-shadow: 0 0 5px #ccc;
+        }
+
+        .ready {
+            color: green;
+            font-weight: bold;
+        }
+
+        .waiting {
+            color: orange;
+            font-weight: bold;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="header">
+    <img src="/logo.png" class="logo">
+    <div class="subtitle">Smart Xerox Ordering System</div>
+</div>
+
+<div class="box">
+
+    <h2>Upload Print Order</h2>
+
+    <form id="orderForm">
+
+        <input type="file" name="file" required>
+
+        <input type="number" name="copies" placeholder="Copies" required>
+
+        <select name="color">
+            <option>Black & White</option>
+            <option>Color</option>
+        </select>
+
+        <select name="sides">
+            <option>Single</option>
+            <option>Double</option>
+        </select>
+
+        <button type="submit">Place Order</button>
+
+    </form>
+
+</div>
+
+<h2>Your Orders</h2>
+
+<div id="orders"></div>
+
+<script>
+
+document.getElementById("orderForm").addEventListener("submit", async function(e){
+
+    e.preventDefault()
+
+    let formData = new FormData(this)
+
+    let res = await fetch("/upload", {
+        method: "POST",
+        body: formData
+    })
+
+    await res.json()
+
+    alert("Order Placed Successfully")
+
+    loadOrders()
+})
+
+async function loadOrders(){
+
+    let res = await fetch("/orders")
+    let orders = await res.json()
+
+    let html = ""
+
+    orders.forEach(o => {
+
+        html += `
+        <div class="order">
+
+            <p><b>Order ID:</b> ${o.id}</p>
+            <p><b>File:</b> ${o.file}</p>
+
+            <p><b>Status:</b>
+                <span class="${o.status == 'Ready to Collect' ? 'ready' : 'waiting'}">
+                    ${o.status}
+                </span>
+            </p>
+
+        </div>
+        `
+    })
+
+    document.getElementById("orders").innerHTML = html
+}
+
+loadOrders()
+
+setInterval(loadOrders, 5000)
+
+</script>
+
+</body>
+</html>

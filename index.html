@@ -1,0 +1,310 @@
+<<<<<<< HEAD
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>SilentPrint</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+    SilentPrint System
+</header>
+
+<div class="container">
+
+    <!-- Upload Card -->
+    <div class="card">
+
+        <h2>Upload Print Order</h2>
+
+        <form id="orderForm">
+
+            <label>Choose File</label>
+            <input type="file" name="file" required>
+
+            <label>Copies</label>
+            <input type="number" name="copies" value="1" min="1">
+
+            <label>Color</label>
+            <select name="color">
+                <option>Black & White</option>
+                <option>Color</option>
+            </select>
+
+            <label>Sides</label>
+            <select name="sides">
+                <option>Single</option>
+                <option>Double</option>
+            </select>
+
+            <button type="submit">Place Order</button>
+
+        </form>
+
+    </div>
+
+
+    <!-- Orders Card -->
+    <div class="card">
+
+        <h2>Orders</h2>
+
+        <div id="orders"></div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+// Place Order
+document.getElementById("orderForm").addEventListener("submit", async (e) => {
+
+    e.preventDefault();
+
+    const formData = new FormData(e.target);
+
+    const res = await fetch("/order", {
+        method: "POST",
+        body: formData
+    });
+
+    const data = await res.json();
+
+    alert("Order ID: " + data.order.id);
+
+    loadOrders();
+
+    e.target.reset();
+});
+
+
+// Load Orders
+async function loadOrders() {
+
+    const res = await fetch("/orders");
+    const orders = await res.json();
+
+    const container = document.getElementById("orders");
+
+    container.innerHTML = "";
+
+    if (orders.length === 0) {
+        container.innerHTML = "<p>No orders available</p>";
+        return;
+    }
+
+    orders.forEach(order => {
+
+        container.innerHTML += `
+
+        <div class="order-card">
+
+            <h3>Order ID: ${order.id}</h3>
+
+            <p><b>File:</b> ${order.file}</p>
+            <p><b>Copies:</b> ${order.copies}</p>
+            <p><b>Color:</b> ${order.color}</p>
+            <p><b>Sides:</b> ${order.sides}</p>
+
+            <img src="${order.qr}" width="120">
+
+            <br><br>
+
+            <button class="print-btn" onclick="printAndDelete(${order.id}, '${order.file}')">
+                Print & Remove
+            </button>
+
+        </div>
+
+        `;
+    });
+
+}
+
+
+// Print and Delete
+async function printAndDelete(id, file) {
+
+    window.open("/uploads/" + file);
+
+    setTimeout(async () => {
+
+        await fetch("/delete-order/" + id, {
+            method: "DELETE"
+        });
+
+        alert("Printed and Removed");
+
+        loadOrders();
+
+    }, 2000);
+}
+
+
+// Load orders on start
+loadOrders();
+
+</script>
+
+</body>
+=======
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>SilentPrint</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+    SilentPrint System
+</header>
+
+<div class="container">
+
+    <!-- Upload Card -->
+    <div class="card">
+
+        <h2>Upload Print Order</h2>
+
+        <form id="orderForm">
+
+            <label>Choose File</label>
+            <input type="file" name="file" required>
+
+            <label>Copies</label>
+            <input type="number" name="copies" value="1" min="1">
+
+            <label>Color</label>
+            <select name="color">
+                <option>Black & White</option>
+                <option>Color</option>
+            </select>
+
+            <label>Sides</label>
+            <select name="sides">
+                <option>Single</option>
+                <option>Double</option>
+            </select>
+
+            <button type="submit">Place Order</button>
+
+        </form>
+
+    </div>
+
+
+    <!-- Orders Card -->
+    <div class="card">
+
+        <h2>Orders</h2>
+
+        <div id="orders"></div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+// Place Order
+document.getElementById("orderForm").addEventListener("submit", async (e) => {
+
+    e.preventDefault();
+
+    const formData = new FormData(e.target);
+
+    const res = await fetch("/order", {
+        method: "POST",
+        body: formData
+    });
+
+    const data = await res.json();
+
+    alert("Order ID: " + data.order.id);
+
+    loadOrders();
+
+    e.target.reset();
+});
+
+
+// Load Orders
+async function loadOrders() {
+
+    const res = await fetch("/orders");
+    const orders = await res.json();
+
+    const container = document.getElementById("orders");
+
+    container.innerHTML = "";
+
+    if (orders.length === 0) {
+        container.innerHTML = "<p>No orders available</p>";
+        return;
+    }
+
+    orders.forEach(order => {
+
+        container.innerHTML += `
+
+        <div class="order-card">
+
+            <h3>Order ID: ${order.id}</h3>
+
+            <p><b>File:</b> ${order.file}</p>
+            <p><b>Copies:</b> ${order.copies}</p>
+            <p><b>Color:</b> ${order.color}</p>
+            <p><b>Sides:</b> ${order.sides}</p>
+
+            <img src="${order.qr}" width="120">
+
+            <br><br>
+
+            <button class="print-btn" onclick="printAndDelete(${order.id}, '${order.file}')">
+                Print & Remove
+            </button>
+
+        </div>
+
+        `;
+    });
+
+}
+
+
+// Print and Delete
+async function printAndDelete(id, file) {
+
+    window.open("/uploads/" + file);
+
+    setTimeout(async () => {
+
+        await fetch("/delete-order/" + id, {
+            method: "DELETE"
+        });
+
+        alert("Printed and Removed");
+
+        loadOrders();
+
+    }, 2000);
+}
+
+
+// Load orders on start
+loadOrders();
+
+</script>
+
+</body>
+>>>>>>> d546de1c3293892a4cab95d951edd249e8420559
+</html>
