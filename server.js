@@ -13,17 +13,17 @@ app.use("/uploads", express.static("uploads"))
 
 const PORT = process.env.PORT || 3000
 
-// create uploads folder
+// create uploads folder if not exists
 if (!fs.existsSync("uploads")) {
     fs.mkdirSync("uploads")
 }
 
-// create orders.json
+// create orders.json if not exists
 if (!fs.existsSync("orders.json")) {
     fs.writeFileSync("orders.json", "[]")
 }
 
-// multer
+// multer setup
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, "uploads/")
@@ -42,8 +42,9 @@ app.post("/upload", upload.single("file"), (req, res) => {
 
     let orders = JSON.parse(fs.readFileSync("orders.json"))
 
+    // serial order id
     const newOrder = {
-        id: Date.now(),
+        id: orders.length + 1,
         file: req.file.filename,
         copies,
         color,
@@ -58,7 +59,7 @@ app.post("/upload", upload.single("file"), (req, res) => {
     res.json(newOrder)
 })
 
-// get orders
+// get all orders
 app.get("/orders", (req, res) => {
 
     const orders = JSON.parse(fs.readFileSync("orders.json"))
@@ -74,9 +75,11 @@ app.post("/update-status", (req, res) => {
     let orders = JSON.parse(fs.readFileSync("orders.json"))
 
     orders = orders.map(order => {
+
         if (order.id == id) {
             order.status = status
         }
+
         return order
     })
 
@@ -85,6 +88,7 @@ app.post("/update-status", (req, res) => {
     res.json({ success: true })
 })
 
+// start server
 app.listen(PORT, () => {
     console.log("Server running on port " + PORT)
 })
